@@ -1,0 +1,6 @@
+name = "Cmap"
+packages = ["matplotlib", "numpy", "scipy", "IPython", "ipywidgets", "panel","sqlite3"]
+
+[files]
+"./c_map.py" = ""
+"./sample/Example_4_mix.wav" = ""
