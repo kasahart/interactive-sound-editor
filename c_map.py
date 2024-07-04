@@ -19,7 +19,7 @@ cmap_target = mcolors.LinearSegmentedColormap.from_list("", [(0,0,0,0), (1,0,0,0
 
 
 class AudioModel:
-    def __init__(self, file_path=None, data=None, sr=None, n_fft=1024, hop_length=None, win_length=None, window='hann'):
+    def __init__(self, file_path=None, data=None, sr=None, n_fft=1024, hop_length=None, win_length=None, window='hann', norm=None):
         self.n_fft = n_fft
         self.hop_length = hop_length if hop_length is not None else n_fft // 2
         self.win_length = win_length if win_length is not None else n_fft
@@ -34,7 +34,12 @@ class AudioModel:
             raise ValueError("Either file_path or data and sr must be specified.")
         
         self.dtype = self.audio.dtype
-        self.norm = np.max(np.abs(self.audio))
+        
+        if norm is None:
+            self.norm = np.max(np.abs(self.audio))
+        else:
+            self.norm = norm
+            
         self.audio_normalized = self.audio.astype(float) / self.norm  # 正規化
         self.f, self.t, self.Sxx = stft(self.audio_normalized, self.sr, nperseg=self.n_fft, noverlap=self.hop_length, nfft=self.win_length, window=self.window)
         
@@ -90,8 +95,13 @@ class AudioModel:
             Sxx_masked_inv = Sxx_masked_inv[:, start_index:end_index]
         return np.abs(Sxx_masked_inv).mean(1)
     
+    def inverse_scaling(self, audio=None):
+        if audio is None:
+            return (self.audio * self.norm).astype(self.audio.dtype)
+        return (audio * self.norm).astype(self.audio.dtype)
+        
     def save_audio(self, audio, output_path=None):
-        output_audio = (audio * self.norm).astype(self.audio.dtype)
+        output_audio = self.inverse_scaling(audio)
         if output_path is None:
             # wavのbyte列を取得
             buffer = io.BytesIO()
@@ -161,7 +171,7 @@ class AudioViewModel:
 
     def update_history(self, audio, sr):
         self.model_history = self.model_history[:self.model_index+1]
-        model = AudioModel(data=audio, sr=sr)
+        model = AudioModel(data= self.model.inverse_scaling(audio), sr=sr, norm=self.model.norm)
         self.model_history.append(model)
         if len(self.model_history) > 10:
             self.model_history.pop(0)
