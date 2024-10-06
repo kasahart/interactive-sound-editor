@@ -518,7 +518,7 @@ class AudioView:
         )  # カラーマップの横幅をスペクトルの平均値の横幅の3倍に設定
         gs.update(wspace=0.2)
 
-        self.fig = plt.figure(figsize=(10, 5))
+        self.fig = plt.figure(figsize=(12, 6))
 
         # 最初のサブプロットを作成
         self.ax.append(self.fig.add_subplot(gs[0]))
