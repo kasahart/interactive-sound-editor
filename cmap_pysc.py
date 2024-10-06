@@ -167,6 +167,8 @@ class AudioViewPs(c_map.AudioView):
             False, start_time=start, end_time=end
         )
 
+        self.org_audio_player.object = org_audio
+        self.audio_player.object = audio
         self.inv_audio_player.object = inv_audio
 
         logger.debug("Audio player updated")
