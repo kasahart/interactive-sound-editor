@@ -239,7 +239,7 @@ class AudioViewModel:
             self._limited_area()
         )
 
-        mask_perc = compute_percussive_mask(self.model.Sxx)
+        mask_perc = 1 - compute_percussive_mask(self.model.Sxx)
         self.mask[start_freq_index:end_freq_index, start_time_index:end_time_index] = (
             mask_perc[start_freq_index:end_freq_index, start_time_index:end_time_index]
         )
@@ -249,7 +249,7 @@ class AudioViewModel:
         start_time_index, end_time_index, start_freq_index, end_freq_index = (
             self._limited_area()
         )
-        mask_harm = compute_harmonic_mask(self.model.Sxx)
+        mask_harm = 1 - compute_harmonic_mask(self.model.Sxx)
         self.mask[start_freq_index:end_freq_index, start_time_index:end_time_index] = (
             mask_harm[start_freq_index:end_freq_index, start_time_index:end_time_index]
         )
@@ -270,7 +270,8 @@ class AudioViewModel:
         mask = (Sxx - mean) / std > threshold
         # mask = median_filter(mask, size=5, mode="reflect")
         mask = mask.astype(float) ** 2
-        mask = np.clip(mask, 0, 1)
+        mask = 1 - np.clip(mask, 0, 1)
+
         self.mask[start_freq_index:end_freq_index, start_time_index:end_time_index] = (
             mask
         )
