@@ -872,9 +872,12 @@ class AudioView:
         audio = self.viewModel.get_audio_from_spectrogram(
             start_time=start, end_time=end
         )
+        audio = self.viewModel.model.inverse_scaling(audio)
         inv_audio = self.viewModel.get_audio_from_spectrogram(
             False, start_time=start, end_time=end
         )
+        inv_audio = self.viewModel.model.inverse_scaling(inv_audio)
+
         sr = self.viewModel.model.sr
 
         org_audio_player = Audio(org_audio, rate=sr)
