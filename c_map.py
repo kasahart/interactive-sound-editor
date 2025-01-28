@@ -555,7 +555,9 @@ class AudioView:
         self.cmap, self.cmap_mask = [], []
         t, f = self.viewModel.model.t, self.viewModel.model.f / 1e3
         Sxx_log = self.viewModel.get_mask_Sxx_log()
-        self.cmap.append(self.ax[0].imshow(Sxx_log, **cmap_settings))
+        vmax = np.max(Sxx_log)
+        vmin = vmax - 40
+        self.cmap.append(self.ax[0].imshow(Sxx_log, vmin=vmin, vmax=vmax, cmap='jet', **cmap_settings))
         self.cmap_mask.append(
             self.ax[0].imshow(
                 np.zeros(Sxx_log.shape),
@@ -568,7 +570,7 @@ class AudioView:
         inv_Sxx_log = self.viewModel.get_mask_inv_Sxx_log()
         vmin, vmax = self.cmap[0].get_clim()
         self.cmap.append(
-            self.ax[1].imshow(inv_Sxx_log, vmin=vmin, vmax=vmax, **cmap_settings)
+            self.ax[1].imshow(inv_Sxx_log, cmap='jet', vmin=vmin, vmax=vmax, **cmap_settings)
         )
         self.cmap_mask.append(
             self.ax[1].imshow(
@@ -582,8 +584,9 @@ class AudioView:
 
         self.ax[0].set(**settings)
         self.ax[1].set(xlabel="Time [s]", **settings)
-        plt.colorbar(self.cmap[0], ax=self.ax[2], label="Power[dB]")
-        plt.colorbar(self.cmap[1], ax=self.ax[3], label="Power[dB]")
+        self.cmap[1].set_cmap(self.cmap[0].get_cmap())
+        self.cmap[1].set_norm(self.cmap[0].norm)
+        plt.colorbar(self.cmap[0], ax=[self.ax[2], self.ax[3]], label="Power[dB]")
         self.prev_xlim = self.ax[0].get_xlim()
         self.prev_ylim = self.ax[0].get_ylim()
 
