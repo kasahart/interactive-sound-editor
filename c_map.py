@@ -867,7 +867,7 @@ class AudioView:
         start, end = self.ax[0].get_xlim()  # スペクトログラムの表示範囲を取得
 
         org_audio = self.viewModel.model.get_range(
-            self.viewModel.model.audio, start, end
+            self.viewModel.model.audio_normalized, start, end
         )
         audio = self.viewModel.get_audio_from_spectrogram(
             start_time=start, end_time=end
@@ -880,9 +880,9 @@ class AudioView:
 
         sr = self.viewModel.model.sr
 
-        org_audio_player = Audio(org_audio, rate=sr)
-        audio_player = Audio(audio, rate=sr)
-        inv_audio_player = Audio(inv_audio, rate=sr)
+        org_audio_player = Audio(org_audio, rate=sr, normalize=False)
+        audio_player = Audio(audio, rate=sr, normalize=False)
+        inv_audio_player = Audio(inv_audio, rate=sr, normalize=False)
 
         with self.audio_output:
             clear_output(wait=True)
