@@ -276,6 +276,27 @@ class AudioViewModel:
         )
         return self.model.apply_mask(self.mask)
 
+    def apply_frequency_trend_cancellation(self):
+        start_time_index, end_time_index, start_freq_index, end_freq_index = (
+            self._limited_area()
+        )
+
+        Sxx = np.abs(
+            self.model.Sxx[
+                start_freq_index:end_freq_index, start_time_index:end_time_index
+            ]
+        )
+        median = np.median(Sxx, axis=1, keepdims=True)
+        detrend = Sxx - median
+        mask = detrend/Sxx
+        # mask = median_filter(mask, size=5, mode="reflect")
+        mask = mask.astype(float)
+        mask = np.clip(mask, 0, 1)
+        self.mask[start_freq_index:end_freq_index, start_time_index:end_time_index] = (
+            mask
+        )
+        return self.model.apply_mask(self.mask)
+    
     def linear_to_log(self, Sxx):
         return 10 * np.log10(np.abs(Sxx) + np.finfo(float).eps)
 
@@ -679,6 +700,9 @@ class AudioView:
         self.enhance_anomaly_threshold = widgets.FloatSlider(
             min=0, max=10, step=0.5, value=3
         )
+        self.frequency_trend_cancellation_button = widgets.Button(description="Frequency Trend Cancellation")
+        self.frequency_trend_cancellation_button.on_click(self.frequency_trend_cancellation)
+
         vb_reduction = widgets.HBox(
             [self.target_db_slider, self.reduction_db_slider, self.apply_button]
         )
@@ -694,6 +718,7 @@ class AudioView:
             [
                 self.enhance_percussive_button,
                 self.enhance_harmonic_button,
+                self.frequency_trend_cancellation_button
             ]
         )
         vb_enhance_anomaly = widgets.HBox(
@@ -710,6 +735,7 @@ class AudioView:
                         vb_enhance,
                         vb_enhance_anomaly,
                         vb_reduction,
+                        
                     ]
                 )
             )
@@ -816,6 +842,11 @@ class AudioView:
         self.viewModel.apply_zscore_mask(self.enhance_anomaly_threshold.value)
         self.state_and_audio_change()
         logger.debug("Anomaly enhancement applied")
+
+    def frequency_trend_cancellation(self, b=None):
+        self.viewModel.apply_frequency_trend_cancellation()
+        self.state_and_audio_change()
+        logger.debug("Frequency trend cancellation applied")
 
     def update_spectrogram(self):
         if not self.state_changed or not self.mouse_released:

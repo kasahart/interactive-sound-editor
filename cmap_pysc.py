@@ -106,7 +106,9 @@ class AudioViewPs(c_map.AudioView):
         self.enhance_anomaly_threshold = pn.widgets.FloatSlider(
             start=0, end=10, step=0.5, value=3
         )
-
+        self.frequency_trend_cancellation_button = pn.widgets.Button(name="Frequency Trend Cancellation")
+        self.frequency_trend_cancellation_button.on_click(self.frequency_trend_cancellation)
+        
         self.vb_reduction = pn.Row(
             self.target_db_slider,
             self.reduction_db_slider,
@@ -126,6 +128,7 @@ class AudioViewPs(c_map.AudioView):
         self.vb_enhance = pn.Row(
             self.enhance_percussive_button,
             self.enhance_harmonic_button,
+            self.frequency_trend_cancellation_button
         )
         self.vb_enhance_anomaly = pn.Row(
             self.enhance_anomaly_button, self.enhance_anomaly_threshold
@@ -158,7 +161,7 @@ class AudioViewPs(c_map.AudioView):
         start, end = self.ax[0].get_xlim()  # スペクトログラムの表示範囲を取得
 
         org_audio = self.viewModel.model.get_range(
-            self.viewModel.model.audio, start, end
+            self.viewModel.model.audio_normalized, start, end
         )
         audio = self.viewModel.get_audio_from_spectrogram(
             start_time=start, end_time=end
