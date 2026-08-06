@@ -1,0 +1,16 @@
+"""Audio engine boundary; intentionally free of UI dependencies."""
+from pathlib import Path
+from typing import Protocol, runtime_checkable
+
+import numpy as np
+
+from .types import AudioDocument, Spectrum, StftConfig
+
+
+@runtime_checkable
+class AudioEngine(Protocol):
+    def load(self, source: bytes | str | Path) -> AudioDocument: ...
+    def stft(self, document: AudioDocument, config: StftConfig) -> Spectrum: ...
+    def apply_mask(self, spectrum: Spectrum, mask: np.ndarray) -> Spectrum: ...
+    def istft(self, spectrum: Spectrum) -> AudioDocument: ...
+    def export_wav(self, document: AudioDocument) -> bytes: ...
